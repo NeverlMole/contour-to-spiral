@@ -121,23 +121,35 @@ def load_contours_layers(vertices_file_name: str):
 
     coords_all = np.array([ str(line) for line in lines ])
     coords = []
+    coords_xy = []
+    layer_height = 0
     for item in coords_all:
         coord = item.replace('{','').replace('}','').split(",")
         coord_line = [float(i) for i in coord]
-        coord_xyz = coord_line[:2]
-        coords.append(coord_xyz)
-        
+        coord_xy = coord_line[:2]
+        coord_z = coord_line[2]
+        if coord_z == layer_height:
+            coords_xy.append(coord_xy)
+
+        else:
+            layer_height = coord_z
+            coords.append(coords_xy)
+            coords_xy = []
+            coords_xy.append(coord_xy)
+
     # sort coords into sublists
     layers = []
     layer = []
-    while len(coords) > 0:
-        if coords[0] not in layer:
-            layer.append(coords[0])
-            coords.pop(0)
-        elif coords[0] in layer:
-            coords.pop(0)
-            layers.append(layer)
-            layer = []
+    for coords_xy in coords:
+        while len(coords_xy) > 0:
+            if coords_xy[0] not in layer:
+                layer.append(coords_xy[0])
+                coords_xy.pop(0)
+            elif coords_xy[0] in layer:
+                coords_xy.pop(0)
+        layers.append(layer)
+        layer = []
+        
     return layers
 
 def convert_to_shape(shape_file_name: str, layers): 
@@ -154,10 +166,9 @@ def convert_to_shape(shape_file_name: str, layers):
             lines.append(xy)
         with open(shape_file_name + '_' + str(layer_count) + '.txt', 'w') as file:
             file.writelines([ str(line) + "\n" for line in lines])
-            print(f"Successfully wrote shape file to {shape_file_name}")
+            print(f"Successfully wrote shape file to {shape_file_name}_{layer_count}.txt")
             lines = []
         layer_count += 1
-
 
 load_layer = load_contours_layers(vertices_file_name)
 convert_to_shape(shape_file_name, load_layer)
