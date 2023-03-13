@@ -125,6 +125,29 @@ def get_contours(f):
     return contours
 
 
+############################### General-Algorithm ################################################
+
+def compute_spiral(contours, alg_init, alg_next_cut, alg_last_cut):
+    # initial path
+    init_split_ray = dir_to_ray(angle_to_dir(INIT_ANG))
+    spiral = contours[0].split(init_split_ray)
+
+    prev_state = alg_init(spiral)
+    for i in range(len(contours) - 1):
+        new_ang, cut_ang, prev_state = alg_next_cut(contours[i], contours[i + 1], prev_state)
+        # compute spiral
+        split_ray_1 = dir_to_ray(angle_to_dir(new_ang))
+        spiral.link(contours[i].split(split_ray_1, False))
+        split_ray_2 = dir_to_ray(angle_to_dir(cut_ang), spiral.points[-1][0])
+        new_path = contours[i + 1].split(split_ray_2)
+        spiral.link(new_path)
+
+    last_ang = alg_last_cut(contours[-1], prev_state)
+    last_split_ray = dir_to_ray(angle_to_dir(last_ang))
+    spiral.link(contours[-1].split(last_split_ray, False))
+    return spiral
+
+
 ################################# Right-Angle-Algorithm ##########################################
 
 def get_new_cut_right_angle(prev_state):
@@ -137,31 +160,22 @@ def get_new_cut_right_angle(prev_state):
     else:
         new_angle = prev_angle + 2 * np.arcsin(radius / dis)
 
-    return new_angle, new_angle
+    return new_angle
+
+def right_angle_init(spiral):
+    return spiral.points[0]
+
+def right_angle_next_cut(cur_contour, next_contour, prev_state):
+    new_angle = get_new_cut_right_angle(prev_state)
+    split_ray = dir_to_ray(angle_to_dir(new_angle))
+    new_path = next_contour.split(split_ray)
+    return new_angle, new_angle, new_path.points[0]
+
+def right_angle_last_cut(last_contour, prev_state):
+    return get_new_cut_right_angle(prev_state)
 
 def compute_spiral_right_angle(contours):
-    # initial path
-    init_split_ray = dir_to_ray(angle_to_dir(INIT_ANG))
-    spiral = contours[0].split(init_split_ray)
-
-    prev_state = spiral.points[0]
-    for i in range(len(contours) - 1):
-        new_ang, cut_ang = get_new_cut_right_angle(prev_state)
-
-        # compute spiral
-        split_ray_1 = dir_to_ray(angle_to_dir(new_ang))
-        spiral.link(contours[i].split(split_ray_1, False))
-        split_ray_2 = dir_to_ray(angle_to_dir(cut_ang), spiral.points[-1][0])
-        new_path = contours[i + 1].split(split_ray_2)
-        spiral.link(new_path)
-
-        # update prev_state
-        prev_state = new_path.points[0]
-
-    last_ang = get_new_cut_right_angle(prev_state)
-    last_split_ray = dir_to_ray(angle_to_dir(new_ang))
-    spiral.link(contours[-1].split(last_split_ray, False))
-    return spiral
+    return compute_spiral(contours, right_angle_init, right_angle_next_cut, right_angle_last_cut)
 
 
 ############################################## MAIN ##############################################
