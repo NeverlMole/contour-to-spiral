@@ -4,7 +4,7 @@ import math
 import matplotlib as mpl
 
 file_name1 = 'test-0.txt'
-file_name2 = 'test-0.out'
+file_name2 = 'test-0.txt.spiral'
 
 input = []
 with open(file_name1, 'r') as f:
@@ -25,9 +25,12 @@ with open(file_name2, 'r') as f:
     for line in lines:
         words = line.split(' ')
         if words[0] == 'closed':
-            tmp = np.zeros((int(words[1])-1, 5))
+            tmp = np.zeros((int(words[1])-1, 3))
             cnt = int(words[1])
             continue
+        if len(words) == 1:
+            tmp = np.zeros((int(words[0])-1, 3))
+            cnt = int(words[0])
         if idx < cnt - 1:
             tmp[idx] = words
             idx += 1
