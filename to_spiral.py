@@ -14,7 +14,7 @@ INIT_ANG = 0.3
 MAX_RG = 1e5
 CIR_DIVID_NUM = 30
 RIGHT_ANGLE_ANG = 1
-ANGLE_SEARCH_WEIGHT_UNDERFILL = 0.001
+ANGLE_SEARCH_WEIGHT_UNDERFILL = 0.7
 ANGLE_SEARCH_MAX_RANGE = 2
 ANGLE_SEARCH_SEARCH_RANGE = 1e-2
 
@@ -462,8 +462,11 @@ if __name__ == '__main__':
     shape_file = sys.argv[1]
     contour_file = sys.argv[2]
     alg = sys.argv[3]
+    output_file = shape_file + '.spiral'
     if alg == 's':
         output_file = shape_file + '-s-w' + str(ANGLE_SEARCH_WEIGHT_UNDERFILL) + '-p' + str(ANGLE_SEARCH_SEARCH_RANGE) + '.spiral'
+    if alg == 'r':
+        output_file = shape_file + '-r-a' + str(RIGHT_ANGLE_ANG) + '.spiral'
 
     contours = []
     with open(contour_file, 'r', encoding='utf-8') as f:
