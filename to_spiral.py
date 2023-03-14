@@ -14,9 +14,9 @@ INIT_ANG = 0.3
 MAX_RG = 1e5
 CIR_DIVID_NUM = 30
 RIGHT_ANGLE_ANG = 1
-ANGLE_SEARCH_WEIGHT_UNDERFILL = 0.5
+ANGLE_SEARCH_WEIGHT_UNDERFILL = 0.001
 ANGLE_SEARCH_MAX_RANGE = 2
-ANGLE_SEARCH_SEARCH_RANGE = 1e-5
+ANGLE_SEARCH_SEARCH_RANGE = 1e-2
 
 center_point = np.array([0.0, 0.0])
 
@@ -332,9 +332,6 @@ def get_best_next_angle(start_angle, new_angle, end_angle, cur_contour, next_con
         m1_eva = get_eva(start_angle, new_angle, next_m1, end_angle, cur_contour, next_contour, prev_poly)
         m2_eva = get_eva(start_angle, new_angle, next_m2, end_angle, cur_contour, next_contour, prev_poly)
 
-        print("Test case (", new_angle, ",", next_m1, "): eva = ", m1_eva)
-        print("Test case (", new_angle, ",", next_m2, "): eva = ", m2_eva)
-
         next_range = next_range * 2 / 3
         if m1_eva > m2_eva:         # m2 gets better result
             next_angle = next_m1
@@ -368,8 +365,11 @@ def angle_search_next_cut(cur_contour, next_contour, prev_state):
         new_m1 = new_angle - new_range / 3
         new_m2 = new_angle - 2 * new_range / 3
 
-        _, m1_eva = get_best_next_angle(start_angle, new_m1, end_angle, cur_contour_s, next_contour_s, prev_poly_s)
-        _, m2_eva = get_best_next_angle(start_angle, new_m2, end_angle, cur_contour_s, next_contour_s, prev_poly_s)
+        _1, m1_eva = get_best_next_angle(start_angle, new_m1, end_angle, cur_contour_s, next_contour_s, prev_poly_s)
+        _2, m2_eva = get_best_next_angle(start_angle, new_m2, end_angle, cur_contour_s, next_contour_s, prev_poly_s)
+
+        print("Test case (", new_m1, ",", _1, "): eva = ", m1_eva)
+        print("Test case (", new_m2, ",", _2, "): eva = ", m2_eva)
 
         new_range = new_range * 2 / 3
         if m1_eva > m2_eva:         # m2 gets better result
@@ -462,7 +462,8 @@ if __name__ == '__main__':
     shape_file = sys.argv[1]
     contour_file = sys.argv[2]
     alg = sys.argv[3]
-    output_file = shape_file + '.spiral'
+    if alg == 's':
+        output_file = shape_file + '-s-w' + str(ANGLE_SEARCH_WEIGHT_UNDERFILL) + '-p' + str(ANGLE_SEARCH_SEARCH_RANGE) + '.spiral'
 
     contours = []
     with open(contour_file, 'r', encoding='utf-8') as f:
