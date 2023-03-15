@@ -10,7 +10,7 @@ import geopandas as gpd
 import matplotlib.pyplot as plt
 
 SPLIT_ANG = 0
-INIT_ANG = 0.3
+INIT_ANG = 0.1
 MAX_RG = 1e5
 CIR_DIVID_NUM = 30
 RIGHT_ANGLE_ANG = 0
@@ -196,7 +196,9 @@ def get_contours(f):
         if s == '' : break
         s = s.split(' ')
         num_points = int(s[1])
-        layer_label = int(s[2])
+        layer_label = cur_layer
+        if len(s) > 2:
+            layer_label = int(s[2])
 
         # more than one contour for some layer
         if layer_label != cur_layer:
@@ -216,6 +218,7 @@ def get_contours(f):
     print('The center of the contours is (', center_point[0], ',', center_point[1], ')')
     contours = []
     for i in range(cur_layer-1, -1, -1):
+        poly = Path(contour_points[i]).get_poly()
         contours.append(get_contour(contour_points[i]))
 
     return contours
@@ -465,10 +468,10 @@ if __name__ == '__main__':
     output_file = shape_file + '.spiral'
     if alg == 's':
         ANGLE_SEARCH_WEIGHT_UNDERFILL = float(sys.argv[4])
-        output_file = shape_file + '-s-w' + str(ANGLE_SEARCH_WEIGHT_UNDERFILL) + '-p' + str(ANGLE_SEARCH_SEARCH_RANGE) + '.spiral'
+        output_file = contour_file + '-s-w' + str(ANGLE_SEARCH_WEIGHT_UNDERFILL) + '-p' + str(ANGLE_SEARCH_SEARCH_RANGE) + '.spiral'
     if alg == 'r':
         RIGHT_ANGLE_ANG = float(sys.argv[4])
-        output_file = shape_file + '-r-a' + str(RIGHT_ANGLE_ANG) + '.spiral'
+        output_file = contour_file + '-r-a' + str(RIGHT_ANGLE_ANG) + '.spiral'
 
     contours = []
     with open(contour_file, 'r', encoding='utf-8') as f:
